@@ -1,0 +1,92 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[portuges]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{array}
+\usepackage{graphicx}
+
+%
+% Page display
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+
+\addtolength{\topmargin}{-0.5in}
+\addtolength{\textheight}{1in}
+
+\begin{document}
+
+\noindent {\bf Matemática Aplicada  \hfill UFRJ \\
+               Otimização Convexa   \hfill 2022/2}
+
+\bigskip
+\bigskip
+
+\centerline{\bf\Large
+Pré-projeto de Otimização}
+
+\bigskip
+
+\section{Introdução}
+Neste projeto pretendo otimizar a escolha de localização para uma antena (por ex., de 5G) em uma cidade. Para isso levarei em consideração que a intensidade do sinal da antena em cada ponto $p$ da cidade e, consequentemente, o grau de satisfação dos usuários em $p$ são funções decrescentes da distância entre a localização da antena e $p$. Além disso, tipicamente, a população da cidade estará distribuída no espaço de forma heterogênea. Assumindo que a antena possui capacidade ilimitada, o problema consistirá em encontrar a localização da antena que maximize a quantidade total de sinal recebida pelos usuários (ou a satisfação total dos mesmos). Também irei discutir uma variante do problema com duas (ou mais) antenas.
+
+\section{Modelo}
+
+\subsection{Modelo básico}
+\def\RR{\mathbb{R}}
+\def\g{\gamma}
+Os atributos geográficos da cidade serão modelados de tal forma que cada ponto da cidade seja representado por um par ordenado $p = (p_1,p_2) \in [0,1] \times [0,1]$. A variável de decisão do problema básico com uma antena será a localização da antena, representada por um par ordenado $x = (x_1,x_2) \in \RR \times \RR$. Temos então a restrição lógica
+\begin{equation}
+	0 \preceq x \preceq 1 .
+\end{equation}
+A distribuição espacial da população da cidade será modelada por uma função de densidade populacional $\g : [0,1] \times [0,1] \rightarrow \RR_{+}$. Dada uma função $s : \RR_{+} \rightarrow \RR $ de intensidade do sinal (ou de satisfação dos usuários) a uma distância $d$ de $x$ e escrevendo a distância de $x$ a $p$ como $d(x,p)$ temos a função objetivo
+\begin{equation}
+	f(x) = \int_0^1\int_0^1 s(d(x,p)) \, \g(p) \, \text{d}p_1\text{d}p_2 ,
+\end{equation}
+O problema de otimização pode então ser escrito como
+\begin{equation}
+	\label{problema}
+	\begin{array}{rl}
+		\max_{x} & f(x) \\[0.5ex] % Pequena separação visual entre a fobj e as restrições
+		\text{s.a} & 0 \preceq x \preceq 1 .
+	\end{array}
+\end{equation}
+
+A decisão mais difícil no que se refere à modelagem deste problema é a escolha da função de intensidade do sinal (ou satisfação dos usuários). Uma escolha intuitiva e razoavelmente realista para uma função de intensidade do sinal é uma função do tipo 
+\begin{equation}
+	s(d) = c_0\exp(-c_1d),
+\end{equation}
+com $c_0, c_1 > 0$. Para uma tal $s$, porém, a função objetivo dada por (2) não será côncava (muito menos convexa), e portanto o problema de otimização (3) não poderá ser abordado de maneira imediata pelos métodos de otimização convexa estudados. Uma escolha alternativa é uma função do tipo 
+\begin{equation}
+	s(d) = c_0 - c_1d,
+\end{equation}
+com $c_1 > 0$. Uma tal $s$ irá possuir a propriedade de assumir valores negativos, não podendo portanto ser interpretada como um modelo para a intensidade do sinal a uma distância $d$ de $x$, a qual somente assumiria valores positivos. Apesar disso, poderíamos interpretar $s$ de outras maneiras convincentes como, por exemplo, uma medida de satisfação dos usuários (onde satisfação negativa equivale a insatisfação) ou até mesmo o $\log$ da intensidade do sinal (uma vez que $\log(\RR_{++}) = \RR$). Mais importante, porém, é que para uma tal $s$ a função objetivo dada por (2) será côncava, e portanto o problema de otimização (3) será, para todos os efeitos, um problema de otimização convexo. Ao longo do projeto explorarei ambas as famílias de funções ora descritas, havendo ainda a possibilidade de se levantar modelos mais comprometidos com os fatos físicos do problema estudado.
+
+\subsection{Modelo com $K$ antenas}
+
+No interesse da completude porém com respeito à concisão me limitarei neste pré-projeto apenas a mencionar o problema com mais de uma antena:
+\begin{equation}
+	\label{problema}
+	\begin{array}{rl}
+		\max_{x_1,\dots,x_k} & {\displaystyle \int_0^1\int_0^1 s(\text{min}_k \, d(x_k,p)) \, \g(p) \, \text{d}p_1\text{d}p_2} \\[1.5ex] % Pequena separação visual entre a fobj e as restrições
+		\text{s.a} & 0 \preceq x_k \preceq 1, \,\,\, k = 1, \dots, K .
+	\end{array}
+\end{equation}
+
+\section{Implementação}
+
+\subsection{Casos considerados}
+Considerarei as versões convexa e não-convexa do problema com uma antena e a versão (não-convexa) do problema com duas antenas. Em relação à densidade populacional $\g$ da cidade, irei trabalhar tanto com modelos de brinquedo quanto com dados oficiais fornecidos pelo órgão competente da Prefeitura da Cidade do Rio de Janeiro.
+
+\subsection{Algoritmos}
+
+Para solucionar a versão convexa do problema pretendo utilizar os recursos do CVXPY. Para solucionar as versões não-convexas do problema pretendo programar um algoritmo de gradiente descendente.
+
+
+\end{document}
+
+% vim:set spelllang=pt:
