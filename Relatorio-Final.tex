@@ -1,0 +1,302 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[portuges]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\usepackage{amsmath, amsfonts, amssymb, array}
+
+\usepackage{pgf, caption}
+
+\usepackage{enumitem}
+
+\usepackage[section]{placeins}
+
+\usepackage{float}
+
+%
+% Page display
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+
+\addtolength{\topmargin}{-0.5in}
+\addtolength{\textheight}{1in}
+
+\usepackage{setspace}
+\onehalfspacing
+
+\begin{document}
+	
+\pagenumbering{gobble}
+
+\vspace*{-1in}
+\begin{center}
+	\textbf{Universidade Federal do Rio de Janeiro} \\
+	\textbf{\small Instituto de Matemática \\ Departamento de Matemática Aplicada} \\
+	
+	\vspace{1.5in}
+	
+	\textit{\textbf{\Large Métodos de Otimização - 2022/2}} \\
+	\textbf{\huge Relatório Final de Projeto - \\ Disposição Ótima de Antenas}
+	
+	\vspace{1.5in}
+	
+	\textit{\large Aluno:} \\
+	\textbf{\Large Luan Lima Freitas} \\
+	
+	\vspace{0.5in}
+	\textit{\large Professor:} \\
+	\textbf{\large Bernardo Freitas Paulo da Costa}
+\end{center}
+
+\newpage
+\pagenumbering{arabic}
+
+\tableofcontents
+\newpage
+
+\section{Introdução}
+Este projeto consiste na otimização da disposição de uma ou mais antenas (por ex., de 5G) em uma cidade. Para isso, é levado em consideração que a intensidade do sinal das antenas em cada ponto $p$ da cidade e, consequentemente, o grau de satisfação dos usuários em $p$ são funções decrescentes da distância entre $p$ e a posição da antena mais próxima. Além disso, tipicamente, a população da cidade está distribuída no espaço de forma heterogênea. A fim de trabalhar com um caso concreto, são utilizados dados demográficos da cidade do Rio de Janeiro. Assumindo que as antenas possuem capacidade ilimitada, o problema consiste em encontrar a disposição das antenas que maximize a quantidade total de sinal recebida pelos usuários (ou a satisfação total dos mesmos).
+
+\section{Formulação dos problemas de otimização}
+
+\subsection{Formulação inicial do problema de uma antena}
+\def\RR{\mathbb{R}}
+\def\g{\gamma}
+
+Podemos modelar os atributos espaciais da cidade de forma que cada ponto da cidade seja representado por um par ordenado $p = (p_1,p_2) \in \RR^2$. Desta forma, a variável de decisão do problema de uma antena, a saber, a posição da antena, será dada por um par ordenado $x = (x_1,x_2) \in \RR^2$. Temos então a restrição lógica
+\begin{equation*}
+	x \in C ,
+\end{equation*}
+onde $C$ é o conjunto dos pontos da cidade. Um modelo natural para a distribuição espacial da população da cidade é uma função de densidade populacional $\g : C \rightarrow \RR_{+}$. Enfim, dada uma função $s : \RR_{+} \rightarrow \RR $ de intensidade do sinal (ou de satisfação dos usuários) a uma distância $d$ de $x$ e escrevendo a distância de $x$ a $p$ como $d(x,p)$ temos a função objetivo
+\begin{equation}
+	\label{f_obj}
+	f(x) = \int_C s(d(x,p)) \, \g(p) \, \text{d}p ,
+\end{equation}
+O problema de otimização pode então ser escrito como
+\begin{equation}
+	\label{pb}
+	\begin{array}{rl}
+		\max_{x} & f(x) \\[0.5ex]
+		\text{s.a} & x \in C .
+	\end{array}
+	\tag{P1}
+\end{equation}
+
+A decisão mais difícil no que se refere à modelagem deste problema é a escolha da função de intensidade do sinal (ou satisfação dos usuários). Uma escolha instintiva e razoavelmente realista para uma função de intensidade do sinal é uma função do tipo 
+\begin{equation*}
+	s_1(d) = \exp(-cd),
+\end{equation*}
+com $c > 0$. Para uma tal $s$, porém, a função objetivo dada por \eqref{f_obj} não será côncava, e portanto o problema \eqref{pb} não poderá ser abordado pelos métodos de otimização convexa estudados. Uma escolha alternativa é a função
+\begin{equation*}
+	s_2(d) = -d,
+\end{equation*}
+com $c > 0$. Tal $s$, por apresentar valores negativos, não pode ser interpretada como um modelo para a intensidade do sinal, a qual somente assumiria valores positivos. Todavia, em certo sentido, é possível interpretar $s_2$ como um modelo para a satisfação dos usuários, onde usuários mais próximos de $x$ são usuários mais satisfeitos\footnote{Note que $\text{argmax}_x \int_C -d(x,p) \, \g(p) \, \text{d}p = \text{argmax}_x \int_C \left[a - b \, d(x,p) \right] \, \g(p) \, \text{d}p$ (para $b > 0$), i.e., é indiferente se a satisfação assume valores positivos e negativos ou apenas valores negativos e a razão na qual a insatisfação cresce com a distância.}. Vendo por outro ângulo, podemos reescrever o problema \eqref{pb} como
+\begin{equation*}
+	\begin{array}{rl}
+		\min_{x} & \displaystyle \int_C d(x,p) \, \g(p) \,\text{d}p \\[0.5ex]
+		\text{s.a} & x \in C ,
+	\end{array}
+\end{equation*}
+ou, em palavras, o problema de minimizar a distância de $x$ à população da cidade. Por último, veja que
+\begin{equation*}
+	\log(s_1(d)) = c \, s_2(d) ,
+\end{equation*}
+logo $s_2$ pode ainda ser interpretada como o $\log$ da intensidade do sinal. Para tal $s$, a função objetivo dada por \eqref{f_obj} será côncava, e portanto o problema \eqref{pb} será, para todos os efeitos, um problema de otimização convexo. Ao longo do projeto são exploradas ambas as famílias de funções ora descritas e comparados os pontos ótimos dos problemas a elas associados.
+
+\subsection{Formulação inicial do problema de $N$ antenas}
+
+Preservando os termos introduzidos na seção anterior, a variável de decisão do problema de $N$ antenas, a saber, a posição das $N$ antenas, será dada por um vetor de pares ordenados $x = \left(x^{(1)},\dots,x^{(N)}\right) \in \left(\RR^2\right)^N$. A restrição de pertencimento das antenas à área da cidade então se torna
+\begin{equation*}
+	x^{(n)} \in C, \, n = 1, \dots, N .
+\end{equation*}
+À primeira vista, pode parecer lógico formular a nova função objetivo como
+\begin{equation*}
+	f_N(x) = \int_C \left[ \sum\limits_{n=1}^N s(d(x^{(n)},p)) \right] \, \g(p) \, \text{d}p ,
+\end{equation*}
+para a qual teríamos o problema de otimização
+\begin{equation}
+	\label{pb2}
+	\begin{array}{rl}
+		\max_{x} & f_N(x) \\[0.5ex]
+		\text{s.a} & x^{(n)} \in C, \, n = 1, \dots, N .
+	\end{array}
+	\tag{P2}
+\end{equation}
+No entanto, é imediato verificar que se $x^*$ é ponto ótimo do problema \eqref{pb}, então $(x^*,\dots,x^*)$ é ponto ótimo do problema \eqref{pb2}, ou seja, o problema \eqref{pb2} não apresenta nenhum desdobramento inédito em relação ao problema \eqref{pb}. Assim, para produzir um problema verdadeiramente original, devemos incluir a hipótese de que cada indivíduo se utiliza apenas do sinal de maior intensidade dentre os sinais disponíveis, qual seja, o sinal da antena mais próxima da sua posição. Com esta hipótese, temos a função objetivo
+\begin{equation}
+	\label{f_obj2}
+	\hat f_N(x) = \int_C s\left( \min_n d(x^{(n)},p) \right) \, \g(p) \, \text{d}p 
+\end{equation}
+e o problema de otimização
+\begin{equation}
+	\label{pb3}
+	\begin{array}{rl}
+		\max_{x} & \hat f_N(x) \\[0.5ex]
+		\text{s.a} & x^{(n)} \in C, \, n = 1, \dots, N ,
+	\end{array}
+	\tag{P3}
+\end{equation}
+o qual não pode ser abordado pelos métodos de otimização convexa estudados, visto que a função objetivo dada por \eqref{f_obj2} não é côncava.
+
+\subsection{Dados e formulação concreta dos problemas}
+
+Como um caso concreto a ser trabalhado foi escolhido o município do Rio de Janeiro. Os dados relativos à distribuição espacial da população do município foram obtidos através do serviço de informações geográficas Landscan\textsuperscript{[1]} e o recorte pertinente foi realizado pelo grupo de trabalho ModSiming, composto pelo professor Ricardo Rosa e estudantes de graduação da UFRJ\textsuperscript{[2]}. Os dados obtidos consistem em uma matriz de dimensões $39 \times 83$ cujas entradas representam as populações totais de blocos de aproximadamente $0.8\text{km}^2$ de área de posições geográficas dadas por um mapeamento elementar dos índices da matriz a uma projeção cartográfica subjacente (cf. \textbf{Figura 1}).
+
+\begin{figure}[h]
+	\begin{center}
+		\input{pop_RJ.pgf}
+	\end{center}
+	\vspace{-0.4in}
+	\caption*{\textbf{Figura 1}}
+\end{figure}
+
+A estrutura dos dados sugere a aproximação do problema \eqref{pb} por
+\begin{equation}
+	\label{pb4}
+	\begin{array}{rl}
+		\max_{x} & \displaystyle\sum\limits_{p_1=0}^{82} \sum\limits_{p_2=0}^{38} s[d(x,(p_1,p_2))] \, \g_{p_2,p_1} \\[2.5ex]
+		\text{s.a} & 0 \leq x_1 \leq 82 \\
+		& 0 \leq x_2 \leq 38
+	\end{array}
+	\tag{P4}
+\end{equation}
+onde $(\g_{i,j})$ são as entradas da matriz de dados. Seja
+\begin{equation*}
+	P = \{ (p_1,p_2) \in \mathbb{N}^2 ; 0 \leq p_1 \leq 82, 0 \leq p_2 \leq 38, \g_{p_2,p_1} \neq 0\}
+\end{equation*}
+É fácil ver que é suficiente realizar o somatório da função objetivo do problema \eqref{pb4} apenas sobre os índices $(p_1,p_2) \in P$. Além disso, é possível substituir as restrições de desigualdade por uma barreira logarítmica. Assim, a forma final do problema de uma antena será dada por
+\begin{equation}
+	\label{pb5}
+	\begin{array}{rl}
+		\max_{x} & \displaystyle\sum\limits_{(p_1,p_2) \in P} s[d(x,(p_1,p_2))] \, \g_{p_2,p_1} + L(x)
+	\end{array}
+	\tag{P5}
+\end{equation}
+onde
+\begin{equation*}
+	L(x) = \log(x_1) + \log(82 - x_1) + \log(x_2) + \log(38 - x_2)
+\end{equation*}
+Analogamente, o problema \eqref{pb3} poderá ser aproximado por
+\begin{equation}
+	\label{pb6}
+	\begin{array}{rl}
+		\max_{x} & \displaystyle\sum\limits_{(p_1,p_2) \in P} s\left( \min_n d(x^{(n)},(p_1,p_2) \right) \, \g_{p_2,p_1} + \mathcal{L}(x)
+	\end{array}
+	\tag{P6}
+\end{equation}
+onde 
+\begin{equation*}
+	\mathcal{L}(x) = \sum\limits_{n=1}^N L\left(x^{(n)}\right)
+\end{equation*}
+
+\section{Algoritmos e resultados}
+
+\subsection{Problema de uma antena com $s$ linear}
+
+O problema de uma antena com $s$ linear, por se tratar de um problema de otimização convexo (a menos de uma mudança de sinal), pôde ser resolvido de maneira imediata utilizando o CVXPY. Deve-se mencionar que foi resolvido o problema \eqref{pb4}, i.e., a formulação do problema com restrições. Abaixo podem-se visualizar a função objetivo e o ponto ótimo do problema (\textbf{Figuras 2 e 3}).
+\begin{figure}[h]
+	\begin{center}
+		\input{f_obj_s_lin.pgf}
+	\end{center}
+	\vspace{-0.4in}
+	\caption*{\textbf{Figura 2}}
+\end{figure}
+
+\begin{figure}[h]	
+	\begin{center}
+		\input{loc_opt_s_lin.pgf}
+	\end{center}
+	\vspace{-0.4in}
+	\caption*{\textbf{Figura 3}}
+\end{figure}
+
+\subsection{Problema de uma antena com $s$ exponencial}
+
+Em contraste com o problema de uma antena com $s$ linear, o problema de uma antena com $s$ exponencial não é um problema de otimização convexo. Por este motivo, para resolvê-lo, optou-se por implementar um algoritmo simples de subida do gradiente. Desta vez, foi resolvido o problema \eqref{pb5}, i.e., o problema com barreira logarítmica. Abaixo podem-se visualizar a função objetivo do problema, bem como os pontos percorridos durante a execução da subida do gradiente e o resultado final do algoritmo, a saber, um ponto ótimo local da função objetivo, para $c = 0.1$ (\textbf{Figuras 4 e 5}). Podemos inferir visualmente que a função objetivo trabalhada possui apenas um ponto ótimo local, sendo o mesmo, portanto, um ponto ótimo global . Uma abordagem mais sistemática desta matéria será desenvolvida para o problema de $N$ antenas. Ademais, foram comparados os pontos ótimos obtidos para diversos valores de $c$, e observou-se que o ponto ótimo do problema de uma antena com $s$ exponencial converge para o ponto ótimo do problema de uma antena com $s$ linear quando $c$ tende a $0$ (cf. \textbf{Figura 6}).
+
+\begin{figure}[h]
+	\begin{center}
+		\input{f_obj_s_exp.pgf}
+	\end{center}
+	\vspace{-0.4in}
+	\caption*{\textbf{Figura 4}}
+\end{figure}
+
+\begin{figure}[h]
+	\begin{center}
+		\input{loc_opt_s_exp.pgf}
+	\end{center}
+	\vspace{-0.4in}
+	\caption*{\textbf{Figura 5}}
+\end{figure}
+
+\begin{figure}[h]
+	\begin{center}
+		\input{loc_opt_comparacao.pgf}
+	\end{center}
+	\vspace{-0.4in}
+	\caption*{\textbf{Figura 6}}
+\end{figure}
+
+\subsection{Problema de $N$ antenas}
+
+O algoritmo de subida do gradiente implementado para resolver o problema de uma antena com $s$ exponencial foi generalizado para resolver o problema de $N$ antenas \eqref{pb6} com $s$ exponencial. Para $N = 2$, temos a variável de decisão $x = \left(x^{(1)}, x^{(2)}\right)$, um ponto inicial da subida do gradiente $x_0 = \left(x^{(1)}_0, x^{(2)}_0\right)$ e uma sequência de pontos percorridos pela subida do gradiente $(x_n)$. A subida do gradiente foi executada diversas vezes variando os valores de $x^{(1)}_0$ e $x^{(2)}_0$. Reproduzimos graficamente abaixo o resultado deste experimento, mantendo fixo o valor de $x^{(2)}_0$ para melhor visualização (\textbf{Figura 7}). Destacam-se deste exercício duas observações:
+\begin{enumerate}[label = (\roman*)]
+	\item Para todos os valores de $x_0$ empregados, $x_n \rightarrow (a^*,b^*)$ ou $x_n \rightarrow (b^*,a^*)$, para certos valores constantes de $a^*$ e $b^*$.
+	\item $a^* \sim x^*$, onde $x^*$ é o ponto ótimo do problema de uma antena com $s$ exponencial. Em palavras, a posição ótima para uma de duas antenas é próxima à disposição ótima de uma antena.
+\end{enumerate}
+Estas observações sugerem que a subida do gradiente é robusta relativamente a diferentes pontos iniciais e que o ponto ótimo do problema de $N$ antenas é semelhante ao ponto ótimo do problema de $N-1$ antenas com o acréscimo de uma nova antena. Com isso, dada uma solução razoável $x^* = \left( x^{(1)}_*, \dots, x^{(N-1)}_* \right)$ do problema de $N-1$ antenas, podemos encontrar uma solução razoável do problema de $N$ antenas executando a subida do gradiente com $x_0 = \left( x^{(1)}_*, \dots, x^{(N-1)}_*, x \right)$ para vários valores de $x$ e escolhendo dentre os pontos ótimos locais assim obtidos aquele para o qual a função objetivo assumir o maior valor. Não há garantias, porém, que tal solução seja o ponto ótimo do problema. Utilizando este algoritmo, foram encontradas soluções para diversos valores de $N$ (cf. \textbf{Figuras 8, 9 e 10}) e $c$ (cf. \textbf{Figura 11}).
+
+\begin{figure}[H]
+	\begin{center}
+		\input{mult_x0.pgf}
+	\end{center}
+	\vspace{-0.4in}
+	\caption*{\textbf{Figura 7}}
+\end{figure}
+
+\begin{figure}[H]
+	\begin{center}
+		\input{loc_opt_5.pgf}
+	\end{center}
+	\vspace{-0.4in}
+	\caption*{\textbf{Figura 8}}
+\end{figure}
+
+\begin{figure}[H]
+	\begin{center}
+		\input{loc_opt_30.pgf}
+	\end{center}
+	\vspace{-0.4in}
+	\caption*{\textbf{Figura 9}}
+\end{figure}
+
+\newpage
+\begin{figure}[H]
+	\begin{center}
+		\input{loc_opt_100.pgf}
+	\end{center}
+	\vspace{-0.4in}
+	\caption*{\textbf{Figura 10}}
+\end{figure}
+
+\begin{figure}[H]
+	\begin{center}
+		\input{loc_opt_dif_c.pgf}
+	\end{center}
+	\vspace{-0.4in}
+	\caption*{\textbf{Figura 11}}
+\end{figure}
+
+
+\section{Referências}
+
+\begin{enumerate}[label={[\arabic*]}]
+	\item https://landscan.ornl.gov
+	\item https://github.com/ModSiming/EpiSiming
+\end{enumerate}
+
+\end{document}
